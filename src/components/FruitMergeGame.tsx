@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Matter from 'matter-js';
 import { FRUIT_TYPES, WORLD_WIDTH, WORLD_HEIGHT, SPAWN_Y } from '../fruitConstants';
-import { RotateCcw, ArrowLeft, Trophy } from 'lucide-react';
+import { RotateCcw, ArrowLeft, Trophy, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface FruitMergeGameProps {
@@ -120,24 +120,34 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
           ctx.translate(x, y);
           ctx.rotate(body.angle);
 
+          // 2.3D Shadow
           ctx.beginPath();
           ctx.arc(2, 4, radius, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(0,0,0,0.2)';
           ctx.fill();
 
+          // Main Body
           ctx.beginPath();
           ctx.arc(0, 0, radius, 0, Math.PI * 2);
           ctx.fillStyle = fruitType.color;
           ctx.fill();
 
+          // Emoji
+          ctx.font = `${radius * 1.4}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(fruitType.emoji, 0, 2);
+
+          // Highlight (Gloss) - subtle since we have emoji
           ctx.beginPath();
           ctx.arc(-radius * 0.3, -radius * 0.3, radius * 0.2, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,0.4)';
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
           ctx.fill();
 
+          // Shading (Bottom)
           const gradient = ctx.createRadialGradient(0, 0, radius * 0.8, 0, 0, radius);
           gradient.addColorStop(0, 'rgba(0,0,0,0)');
-          gradient.addColorStop(1, 'rgba(0,0,0,0.2)');
+          gradient.addColorStop(1, 'rgba(0,0,0,0.15)');
           ctx.beginPath();
           ctx.arc(0, 0, radius, 0, Math.PI * 2);
           ctx.fillStyle = gradient;
@@ -235,7 +245,8 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#e2e8f0] p-4 font-sans select-none overflow-hidden text-slate-900">
-       <div className="w-full max-w-[400px] flex justify-between items-center mb-6">
+       {/* Header */}
+       <div className="w-full max-w-[400px] flex justify-between items-center mb-4">
         <button onClick={onBack} className="p-2 bg-white rounded-xl shadow-lg border-b-4 border-slate-200 text-slate-600 hover:bg-slate-50 active:translate-y-1 active:border-b-0 transition-all">
           <ArrowLeft className="w-6 h-6" />
         </button>
@@ -253,6 +264,7 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
         </div>
       </div>
 
+      {/* Game Container */}
       <div
         className="relative bg-slate-50 rounded-[40px] overflow-hidden shadow-2xl border-b-8 border-slate-300 cursor-crosshair touch-none"
         style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}
@@ -266,12 +278,14 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
       >
         <div ref={sceneRef} className="absolute inset-0 z-10" />
 
+        {/* Drop Line / Guide */}
         <div className="absolute top-[100px] left-0 right-0 h-0.5 bg-red-400/30 dashed pointer-events-none z-0"
              style={{ borderTop: '2px dashed rgba(248, 113, 113, 0.4)' }} />
 
+        {/* Pending Fruit */}
         {canDrop && !gameOver && (
             <div
-                className="absolute pointer-events-none z-20 transition-all duration-75"
+                className="absolute pointer-events-none z-20 transition-all duration-75 flex items-center justify-center text-center"
                 style={{
                     left: mouseX,
                     top: SPAWN_Y,
@@ -280,13 +294,15 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
                     height: FRUIT_TYPES[nextFruitLevel].radius * 2,
                     backgroundColor: FRUIT_TYPES[nextFruitLevel].color,
                     borderRadius: '50%',
-                    boxShadow: 'inset 0 3px 0 0 rgba(255,255,255,0.5), inset 0 -5px 0 0 rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1)'
+                    boxShadow: 'inset 0 3px 0 0 rgba(255,255,255,0.5), inset 0 -5px 0 0 rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1)',
+                    fontSize: `${FRUIT_TYPES[nextFruitLevel].radius * 1.4}px`
                 }}
             >
-                <div className="absolute top-[15%] left-[15%] w-[25%] h-[15%] bg-white/30 rounded-full" />
+                {FRUIT_TYPES[nextFruitLevel].emoji}
             </div>
         )}
 
+        {/* Game Over Overlay */}
         <AnimatePresence>
             {gameOver && (
                 <motion.div
@@ -308,20 +324,38 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
         </AnimatePresence>
       </div>
 
-      <div className="mt-8 flex items-center gap-6">
-        <div className="bg-white p-4 rounded-3xl shadow-xl border-b-4 border-slate-100 flex items-center gap-4 min-w-[180px]">
+      {/* Progression Hint */}
+      <div className="w-full max-w-[400px] mt-4 mb-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm p-3 rounded-2xl whitespace-nowrap min-w-max border border-white/50 shadow-sm">
+              {FRUIT_TYPES.map((fruit, i) => (
+                  <React.Fragment key={fruit.level}>
+                    <div className="flex flex-col items-center">
+                        <div className="text-xl">{fruit.emoji}</div>
+                        <div className="text-[8px] font-black text-slate-400">{fruit.radius}</div>
+                    </div>
+                    {i < FRUIT_TYPES.length - 1 && (
+                        <ArrowRight className="w-3 h-3 text-slate-300" />
+                    )}
+                  </React.Fragment>
+              ))}
+          </div>
+      </div>
+
+      {/* Footer / Next Piece */}
+      <div className="flex items-center gap-4">
+        <div className="bg-white p-4 rounded-3xl shadow-xl border-b-4 border-slate-100 flex items-center gap-4 min-w-[160px]">
           <div className="flex flex-col">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Next Fruit</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Next</p>
             <p className="font-bold text-slate-700">{FRUIT_TYPES[nextFruitLevel].name}</p>
           </div>
           <div
-            className="w-12 h-12 rounded-full shadow-inner relative"
+            className="w-10 h-10 rounded-full shadow-inner relative flex items-center justify-center text-xl"
             style={{
                 backgroundColor: FRUIT_TYPES[nextFruitLevel].color,
                 boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
             }}
           >
-              <div className="absolute top-[15%] left-[15%] w-[25%] h-[15%] bg-white/20 rounded-full" />
+              {FRUIT_TYPES[nextFruitLevel].emoji}
           </div>
         </div>
 
