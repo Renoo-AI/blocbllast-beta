@@ -1,14 +1,14 @@
 import React from 'react';
-import { LayoutGrid, Cherry } from 'lucide-react';
+import { LayoutGrid, Cherry, Hash, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface HomeProps {
-  onSelectGame: (game: 'block-puzzle' | 'fruit-merge') => void;
+  onSelectGame: (game: 'block-puzzle' | 'fruit-merge' | 'merge-2048' | 'emoji-match') => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ onSelectGame }) => {
   return (
-    <div className="min-h-screen bg-[#e2e8f0] flex flex-col items-center justify-center p-6 font-sans text-slate-900 overflow-hidden">
+    <div className="min-h-screen bg-[#e2e8f0] flex flex-col items-center justify-center p-6 font-sans text-slate-900 overflow-y-auto no-scrollbar py-20">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -30,41 +30,69 @@ export const Home: React.FC<HomeProps> = ({ onSelectGame }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl relative z-10">
         {/* Block Puzzle Card */}
         <motion.button
-          whileHover={{ scale: 1.05, y: -8 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02, y: -5 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => onSelectGame('block-puzzle')}
-          className="bg-white p-10 rounded-[48px] shadow-2xl border-b-[12px] border-slate-200 text-left flex flex-col items-start transition-all group relative overflow-hidden"
+          className="bg-white p-8 rounded-[40px] shadow-xl border-b-[10px] border-slate-200 text-left flex flex-col items-start transition-all group relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-100 transition-colors" />
-
-          <div className="bg-blue-600 text-white p-5 rounded-[28px] mb-8 shadow-lg shadow-blue-200 relative">
-            <LayoutGrid className="w-10 h-10" />
+          <div className="bg-blue-600 text-white p-4 rounded-[22px] mb-6 shadow-lg shadow-blue-200 relative">
+            <LayoutGrid className="w-8 h-8" />
           </div>
-          <h2 className="text-4xl font-black text-slate-800 mb-3">Block<br/>Puzzle</h2>
-          <p className="text-slate-500 font-bold leading-relaxed mb-8">Clear lines and master the grid in 2.3D style.</p>
-
-          <div className="mt-auto bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-600 transition-colors">
-            Play Game
+          <h2 className="text-3xl font-black text-slate-800 mb-2">Block Puzzle</h2>
+          <p className="text-slate-500 font-bold leading-tight mb-6">Clear lines and master the grid in 2.3D style.</p>
+          <div className="mt-auto bg-slate-900 text-white px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest group-hover:bg-blue-600 transition-colors">
+            Play Now
           </div>
         </motion.button>
 
         {/* Fruit Merge Card */}
         <motion.button
-          whileHover={{ scale: 1.05, y: -8 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02, y: -5 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => onSelectGame('fruit-merge')}
-          className="bg-white p-10 rounded-[48px] shadow-2xl border-b-[12px] border-slate-200 text-left flex flex-col items-start transition-all group relative overflow-hidden"
+          className="bg-white p-8 rounded-[40px] shadow-xl border-b-[10px] border-slate-200 text-left flex flex-col items-start transition-all group relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 group-hover:bg-red-100 transition-colors" />
-
-          <div className="bg-red-500 text-white p-5 rounded-[28px] mb-8 shadow-lg shadow-red-200 relative">
-            <Cherry className="w-10 h-10" />
+          <div className="bg-red-500 text-white p-4 rounded-[22px] mb-6 shadow-lg shadow-red-200 relative">
+            <Cherry className="w-8 h-8" />
           </div>
-          <h2 className="text-4xl font-black text-slate-800 mb-3">Fruit<br/>Merge</h2>
-          <p className="text-slate-500 font-bold leading-relaxed mb-8">Drop, merge, and grow the ultimate watermelon.</p>
+          <h2 className="text-3xl font-black text-slate-800 mb-2">Fruit Merge</h2>
+          <p className="text-slate-500 font-bold leading-tight mb-6">Drop, merge, and grow the ultimate watermelon.</p>
+          <div className="mt-auto bg-slate-900 text-white px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest group-hover:bg-red-500 transition-colors">
+            Play Now
+          </div>
+        </motion.button>
 
-          <div className="mt-auto bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-500 transition-colors">
-            Play Game
+        {/* Merge 2048 Card */}
+        <motion.button
+          whileHover={{ scale: 1.02, y: -5 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onSelectGame('merge-2048')}
+          className="bg-white p-8 rounded-[40px] shadow-xl border-b-[10px] border-slate-200 text-left flex flex-col items-start transition-all group relative overflow-hidden"
+        >
+          <div className="bg-orange-500 text-white p-4 rounded-[22px] mb-6 shadow-lg shadow-orange-200 relative">
+            <Hash className="w-8 h-8" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2">Merge 2048</h2>
+          <p className="text-slate-500 font-bold leading-tight mb-6">Slide and merge numbered blocks to reach 2048.</p>
+          <div className="mt-auto bg-slate-900 text-white px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest group-hover:bg-orange-500 transition-colors">
+            Play Now
+          </div>
+        </motion.button>
+
+        {/* Emoji Match Card */}
+        <motion.button
+          whileHover={{ scale: 1.02, y: -5 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onSelectGame('emoji-match')}
+          className="bg-white p-8 rounded-[40px] shadow-xl border-b-[10px] border-slate-200 text-left flex flex-col items-start transition-all group relative overflow-hidden"
+        >
+          <div className="bg-purple-600 text-white p-4 rounded-[22px] mb-6 shadow-lg shadow-purple-200 relative">
+            <Sparkles className="w-8 h-8" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2">Emoji Match</h2>
+          <p className="text-slate-500 font-bold leading-tight mb-6">Test your memory and find all matching pairs.</p>
+          <div className="mt-auto bg-slate-900 text-white px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest group-hover:bg-purple-600 transition-colors">
+            Play Now
           </div>
         </motion.button>
       </div>
@@ -75,7 +103,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectGame }) => {
             <div className="w-2 h-2 rounded-full bg-slate-300"></div>
             <div className="w-2 h-2 rounded-full bg-slate-300"></div>
         </div>
-        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.3em]">Built with React & Matter.js</p>
+        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.3em]">Built for Mobile & Web</p>
       </div>
     </div>
   );

@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Matter from 'matter-js';
 import { FRUIT_TYPES, WORLD_WIDTH, WORLD_HEIGHT, SPAWN_Y } from '../fruitConstants';
-import { RotateCcw, ArrowLeft, Trophy, ArrowRight } from 'lucide-react';
+import { RotateCcw, ArrowLeft, Trophy, ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface FruitMergeGameProps {
   onBack: () => void;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
 }
 
 interface FruitBody extends Matter.Body {
@@ -14,7 +16,7 @@ interface FruitBody extends Matter.Body {
   };
 }
 
-export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
+export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack, soundEnabled, onToggleSound }) => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
   const renderRef = useRef<Matter.Render | null>(null);
@@ -258,9 +260,17 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
         >
           <span className="text-3xl font-black">{score}</span>
         </motion.div>
-        <div className="bg-white px-4 py-2 rounded-2xl shadow-lg border-b-4 border-slate-200 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-            <span className="font-black text-slate-600">{highScore}</span>
+        <div className="flex gap-2">
+            <div className="bg-white px-4 py-2 rounded-2xl shadow-lg border-b-4 border-slate-200 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                <span className="font-black text-slate-600">{highScore}</span>
+            </div>
+            <button
+                onClick={onToggleSound}
+                className="p-2 bg-white rounded-xl shadow-lg border-b-4 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all active:translate-y-1 active:border-b-0"
+            >
+                {soundEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
+            </button>
         </div>
       </div>
 

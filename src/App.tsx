@@ -8,12 +8,21 @@ import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home } from './components/Home';
 import { FruitMergeGame } from './components/FruitMergeGame';
+import { Merge2048 } from './components/Merge2048';
+import { EmojiMatch } from './components/EmojiMatch';
 
-type View = 'home' | 'block-puzzle' | 'fruit-merge';
+type View = 'home' | 'block-puzzle' | 'fruit-merge' | 'merge-2048' | 'emoji-match';
 
 function App() {
   const [view, setView] = useState<View>('home');
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('game_soundEnabled');
+    return saved !== 'false';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('game_soundEnabled', soundEnabled.toString());
+  }, [soundEnabled]);
 
   const handleClear = useCallback((count: number) => {
     if (count >= 1) {
@@ -68,7 +77,33 @@ function App() {
   }
 
   if (view === 'fruit-merge') {
-    return <FruitMergeGame onBack={() => setView('home')} />;
+    return (
+      <FruitMergeGame
+        onBack={() => setView('home')}
+        soundEnabled={soundEnabled}
+        onToggleSound={() => setSoundEnabled(!soundEnabled)}
+      />
+    );
+  }
+
+  if (view === 'merge-2048') {
+    return (
+      <Merge2048
+        onBack={() => setView('home')}
+        soundEnabled={soundEnabled}
+        onToggleSound={() => setSoundEnabled(!soundEnabled)}
+      />
+    );
+  }
+
+  if (view === 'emoji-match') {
+    return (
+      <EmojiMatch
+        onBack={() => setView('home')}
+        soundEnabled={soundEnabled}
+        onToggleSound={() => setSoundEnabled(!soundEnabled)}
+      />
+    );
   }
 
   return (
