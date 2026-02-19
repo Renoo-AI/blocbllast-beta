@@ -3,11 +3,16 @@ import { useGameState } from './hooks/useGameState';
 import { Board } from './components/Board';
 import { PieceSelector } from './components/PieceSelector';
 import { GRID_SIZE, type Shape } from './constants';
-import { Trophy, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { Trophy, RotateCcw, Volume2, VolumeX, ArrowLeft } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Home } from './components/Home';
+import { FruitMergeGame } from './components/FruitMergeGame';
+
+type View = 'home' | 'block-puzzle' | 'fruit-merge';
 
 function App() {
+  const [view, setView] = useState<View>('home');
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const handleClear = useCallback((count: number) => {
@@ -34,7 +39,6 @@ function App() {
   } = useGameState(handleClear);
 
   const boardRef = useRef<HTMLDivElement>(null);
-
   const [activePreview, setActivePreview] = useState<{ shape: Shape; row: number; col: number } | null>(null);
   const [floatingScores, setFloatingScores] = useState<{ id: number; value: number }[]>([]);
   const lastScore = useRef(score);
@@ -59,10 +63,25 @@ function App() {
     return success;
   };
 
+  if (view === 'home') {
+    return <Home onSelectGame={setView} />;
+  }
+
+  if (view === 'fruit-merge') {
+    return <FruitMergeGame onBack={() => setView('home')} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#e2e8f0] flex flex-col items-center py-6 px-4 overflow-hidden select-none font-sans text-slate-900">
       {/* Header */}
       <div className="w-full max-w-[450px] flex justify-between items-center mb-4">
+        <button
+          onClick={() => setView('home')}
+          className="p-2 bg-white rounded-xl shadow-lg border-b-4 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all active:translate-y-1 active:border-b-0"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+
         <div className="relative">
           <motion.div
             key={score}

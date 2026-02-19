@@ -1,30 +1,35 @@
-# 2.3D Block Puzzle Game
+# Game Box 2.3D
 
-A polished, fast, and responsive web app block puzzle game.
+A polished, fast, and responsive collection of web games with a satisfying 2.3D cartoon aesthetic.
 
-## Features
-- **2.3D Cartoon Style**: Rounded blocks with soft bevels, shading, and shadows.
-- **Fair RNG**: Shape bag system ensures a balanced variety of pieces.
-- **Smooth Animations**: Snap-to-grid easing, pop-and-fade line clears, and confetti celebrations.
-- **Responsive Design**: Works great on both desktop and mobile (touch support).
-- **Persistence**: High score saved locally.
-- **Combos**: Earn bonus points for clearing multiple lines or clearing lines consecutively.
+## Games Included
 
-## How to Play
-1. Drag the 3 blocks from the bottom onto the 8x8 grid.
-2. Fill entire rows or columns to clear them and score points.
-3. Use all 3 blocks to get a new set.
-4. The game ends when no more pieces can be placed on the board.
+### 1. Block Puzzle
+- **Grid**: 8x8 classic challenge.
+- **Goal**: Drag pieces and clear lines to score.
+- **Combos**: Earn multipliers for multiple or consecutive line clears.
+
+### 2. Fruit Merge
+- **Physics**: Real physics-based merging using Matter.js.
+- **Goal**: Drop and merge fruits to reach the ultimate watermelon.
+- **Challenge**: Don't let the box overflow!
+
+## Key Features
+- **2.3D Visual Style**: Custom rendering and CSS effects for depth and gloss.
+- **Fair RNG**: Balanced variety of pieces/fruits.
+- **High Performance**: Optimized rendering with Canvas and Framer Motion.
+- **Persistence**: High scores saved locally for each game.
+- **Mobile Support**: Fully responsive with touch controls.
 
 ## Tech Stack
 - **React 19**
 - **TypeScript**
 - **Tailwind CSS 4**
+- **Matter.js** (Physics engine for Fruit Merge)
 - **Framer Motion** (Animations)
 - **Canvas Confetti** (Effects)
-- **Lucide React** (Icons)
 
-## Development
+## Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
@@ -44,8 +49,3 @@ npm run dev
 ```bash
 npm run build
 ```
-
-## Implementation Details
-- **Game Logic**: Managed by a custom hook `useGameState.ts` which handles the 8x8 grid state, shape generation, collision detection, and scoring.
-- **Drag and Drop**: Custom pointer event implementation in `DraggablePiece.tsx` for a smooth, lag-free experience on both mouse and touch.
-- **2.3D Styling**: Achieved through layered CSS box-shadows and subtle transforms in `Block.tsx`.
