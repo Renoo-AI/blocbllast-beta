@@ -18,6 +18,7 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
   const renderRef = useRef<Matter.Render | null>(null);
+  const runnerRef = useRef<Matter.Runner | null>(null);
   const gameOverTimeoutRef = useRef<number | null>(null);
 
   const [score, setScore] = useState(0);
@@ -94,6 +95,9 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
       },
     });
     renderRef.current = render;
+
+    const runner = Matter.Runner.create();
+    runnerRef.current = runner;
 
     const ground = Matter.Bodies.rectangle(WORLD_WIDTH / 2, WORLD_HEIGHT + 25, WORLD_WIDTH, 50, { isStatic: true });
     const leftWall = Matter.Bodies.rectangle(-25, WORLD_HEIGHT / 2, 50, WORLD_HEIGHT, { isStatic: true });
@@ -198,10 +202,11 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack }) => {
         }
     });
 
-    Matter.Runner.run(engine);
+    Matter.Runner.run(runner, engine);
     Matter.Render.run(render);
 
     return () => {
+      Matter.Runner.stop(runner);
       Matter.Render.stop(render);
       Matter.Engine.clear(engine);
       render.canvas.remove();
