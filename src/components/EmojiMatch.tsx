@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw, ArrowLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { playPopSound, playClearSound } from '../utils/soundUtils';
 
 interface EmojiMatchProps {
   onBack: () => void;
@@ -54,6 +55,7 @@ export const EmojiMatch: React.FC<EmojiMatchProps> = ({ onBack, soundEnabled, on
 
     const newCards = [...cards];
     newCards[id].isFlipped = true;
+    if (soundEnabled) playPopSound();
     setCards(newCards);
 
     const newFlipped = [...flippedCards, id];
@@ -65,6 +67,7 @@ export const EmojiMatch: React.FC<EmojiMatchProps> = ({ onBack, soundEnabled, on
 
       if (cards[firstId].emoji === cards[secondId].emoji) {
         // Match
+        if (soundEnabled) playClearSound();
         setTimeout(() => {
           setCards(prev => {
             const updated = [...prev];

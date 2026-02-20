@@ -3,7 +3,7 @@ import { SHAPES, type Shape, GRID_SIZE } from '../constants';
 
 type Grid = (string | null)[][];
 
-export const useGameState = (onClearLines?: (count: number) => void) => {
+export const useGameState = (onClearLines?: (count: number) => void, onCombo?: (count: number) => void) => {
   const [grid, setGrid] = useState<Grid>(() =>
     Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null))
   );
@@ -172,6 +172,7 @@ export const useGameState = (onClearLines?: (count: number) => void) => {
       setCombo(currentCombo);
       setLastMoveCleared(true);
       if (onClearLines) onClearLines(clearedCount);
+      if (currentCombo > 1 && onCombo) onCombo(currentCombo);
     } else {
       setLastMoveCleared(false);
       setCombo(0);
@@ -197,7 +198,7 @@ export const useGameState = (onClearLines?: (count: number) => void) => {
     }
 
     return true;
-  }, [grid, currentPieces, shapeBag, lastMoveCleared, combo, getNextShapeIndex, checkGameOver, onClearLines]);
+  }, [grid, currentPieces, shapeBag, lastMoveCleared, combo, getNextShapeIndex, checkGameOver, onClearLines, onCombo]);
 
   const resetGame = useCallback(() => {
     const emptyGrid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));

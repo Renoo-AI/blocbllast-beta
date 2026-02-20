@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw, ArrowLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { playPopSound } from '../utils/soundUtils';
 
 interface Merge2048Props {
   onBack: () => void;
@@ -117,6 +118,7 @@ export const Merge2048: React.FC<Merge2048Props> = ({ onBack, soundEnabled, onTo
           if (target.value === tile.value && !mergedIds.has(target.id)) {
             // Merge
             moved = true;
+            if (soundEnabled) playPopSound();
             const newTile = { ...tile, row: nextR, col: nextC, value: tile.value * 2 };
             newScore += newTile.value;
             tempGrid[r][c] = null;

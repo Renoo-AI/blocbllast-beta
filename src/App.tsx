@@ -7,6 +7,7 @@ import { Trophy, RotateCcw, Volume2, VolumeX, ArrowLeft } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home } from './components/Home';
+import { playClearSound, playPopSound } from './utils/soundUtils';
 import { FruitMergeGame } from './components/FruitMergeGame';
 import { Merge2048 } from './components/Merge2048';
 import { EmojiMatch } from './components/EmojiMatch';
@@ -24,8 +25,11 @@ function App() {
     localStorage.setItem('game_soundEnabled', soundEnabled.toString());
   }, [soundEnabled]);
 
+  const [floatingCombos, setFloatingCombos] = useState<{ id: number; value: number }[]>([]);
+
   const handleClear = useCallback((count: number) => {
     if (count >= 1) {
+      if (soundEnabled) playClearSound();
       confetti({
         particleCount: count * 50,
         spread: 60,
@@ -34,6 +38,14 @@ function App() {
         disableForReducedMotion: true
       });
     }
+  }, []);
+
+  const handleCombo = useCallback((count: number) => {
+    const id = Date.now();
+    setFloatingCombos(prev => [...prev, { id, value: count }]);
+    setTimeout(() => {
+      setFloatingCombos(prev => prev.filter(f => f.id !== id));
+    }, 1500);
   }, []);
 
   const {
@@ -45,7 +57,7 @@ function App() {
     combo,
     placePiece,
     resetGame
-  } = useGameState(handleClear);
+  } = useGameState(handleClear, handleCombo);
 
   const boardRef = useRef<HTMLDivElement>(null);
   const [activePreview, setActivePreview] = useState<{ shape: Shape; row: number; col: number } | null>(null);
@@ -67,6 +79,7 @@ function App() {
   const handleDrop = (index: number, row: number, col: number) => {
     const success = placePiece(index, row, col);
     if (success) {
+      if (soundEnabled) playPopSound();
       setActivePreview(null);
     }
     return success;
@@ -107,7 +120,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#e2e8f0] flex flex-col items-center py-6 px-4 overflow-hidden select-none font-sans text-slate-900">
+    <div className="min-h-[100dvh] bg-[#e2e8f0] flex flex-col items-center py-6 px-4 overflow-hidden select-none font-sans text-slate-900">
       {/* Header */}
       <div className="w-full max-w-[450px] flex justify-between items-center mb-4">
         <button
@@ -181,6 +194,23 @@ function App() {
       {/* Board */}
       <div className="relative">
         <Board grid={grid} boardRef={boardRef as React.RefObject<HTMLDivElement>} preview={activePreview} />
+
+        {/* Floating Combos */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+          <AnimatePresence>
+            {floatingCombos.map(fc => (
+              <motion.div
+                key={fc.id}
+                initial={{ scale: 0, rotate: -20, opacity: 0 }}
+                animate={{ scale: [0, 1.2, 1], rotate: 0, opacity: 1, y: -120 }}
+                exit={{ opacity: 0, scale: 1.5 }}
+                className="text-4xl font-black text-orange-500 drop-shadow-[0_4px_0_rgba(0,0,0,0.2)] z-50 whitespace-nowrap"
+              >
+                {fc.value}X COMBO!
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Piece Selector */}

@@ -27,19 +27,28 @@ export const DraggablePiece: React.FC<DraggablePieceProps> = ({
   const [previewPos, setPreviewPos] = useState<{ row: number; col: number } | null>(null);
 
   const pieceRef = useRef<HTMLDivElement>(null);
+  const [blockSize, setBlockSize] = useState(35);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (!pieceRef.current) return;
+    if (!pieceRef.current || !boardRef.current) return;
 
     setIsDragging(true);
 
-    // Calculate size of piece in preview
-    const blockSize = 35; // The size in motion.div
-    const width = shape.matrix[0].length * blockSize;
-    const height = shape.matrix.length * blockSize;
+    // Calculate size based on actual board (accounting for gap and padding)
+    const boardRect = boardRef.current.getBoundingClientRect();
+    const gap = 6;
+    const padding = 24; // p-3 on both sides = 12px * 2
+    const currentBlockSize = (boardRect.width - padding - (gridSize - 1) * gap) / gridSize;
+    setBlockSize(currentBlockSize);
 
-    // Center the piece under the finger/cursor
-    setOffset({ x: width / 2, y: height / 2 + 50 });
+    const width = shape.matrix[0].length * currentBlockSize + (shape.matrix[0].length - 1) * gap;
+    const height = shape.matrix.length * currentBlockSize + (shape.matrix.length - 1) * gap;
+
+    const isTouch = e.pointerType === 'touch';
+    const verticalOffset = isTouch ? 100 : 50;
+
+    // Center the piece under the finger/cursor with offset
+    setOffset({ x: width / 2, y: height / 2 + verticalOffset });
     setPosition({ x: e.clientX, y: e.clientY });
 
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -53,16 +62,18 @@ export const DraggablePiece: React.FC<DraggablePieceProps> = ({
     if (!boardRef.current) return;
 
     const boardRect = boardRef.current.getBoundingClientRect();
-    const cellSize = boardRect.width / gridSize;
+    const gap = 6;
+    const padding = 12; // p-3 = 12px
+    const step = blockSize + gap;
 
     const pieceX = e.clientX - offset.x;
     const pieceY = e.clientY - offset.y;
 
-    const relX = pieceX - boardRect.left;
-    const relY = pieceY - boardRect.top;
+    const relX = pieceX - (boardRect.left + padding);
+    const relY = pieceY - (boardRect.top + padding);
 
-    const col = Math.round(relX / cellSize);
-    const row = Math.round(relY / cellSize);
+    const col = Math.round(relX / step);
+    const row = Math.round(relY / step);
 
     if (
       row >= 0 && row <= gridSize - shape.matrix.length &&
@@ -117,7 +128,7 @@ export const DraggablePiece: React.FC<DraggablePieceProps> = ({
               className="fixed pointer-events-none z-[999]"
               transition={{ type: 'spring', damping: 25, stiffness: 400, mass: 0.5 }}
             >
-              <Piece shape={shape} blockSize={35} />
+              <Piece shape={shape} blockSize={blockSize} gap={6} />
             </motion.div>
           )}
         </AnimatePresence>,

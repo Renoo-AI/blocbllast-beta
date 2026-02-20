@@ -4,17 +4,18 @@ import { Block } from './Block';
 interface PieceProps {
   shape: Shape;
   blockSize?: number;
+  gap?: number;
   className?: string;
 }
 
-export const Piece: React.FC<PieceProps> = ({ shape, blockSize = 30, className = '' }) => {
+export const Piece: React.FC<PieceProps> = ({ shape, blockSize = 30, gap = 2, className = '' }) => {
   return (
     <div
       className={`inline-grid ${className}`}
       style={{
         gridTemplateRows: `repeat(${shape.matrix.length}, ${blockSize}px)`,
         gridTemplateColumns: `repeat(${shape.matrix[0].length}, ${blockSize}px)`,
-        gap: '2px'
+        gap: `${gap}px`
       }}
     >
       {shape.matrix.map((row, rowIndex) =>

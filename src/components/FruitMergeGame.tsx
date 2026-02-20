@@ -3,6 +3,7 @@ import Matter from 'matter-js';
 import { FRUIT_TYPES, WORLD_WIDTH, WORLD_HEIGHT, SPAWN_Y } from '../fruitConstants';
 import { RotateCcw, ArrowLeft, Trophy, ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { playPopSound, playClearSound } from '../utils/soundUtils';
 
 interface FruitMergeGameProps {
   onBack: () => void;
@@ -32,6 +33,9 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack, soundEna
   const [nextFruitLevel, setNextFruitLevel] = useState(0);
   const [canDrop, setCanDrop] = useState(true);
   const [mouseX, setMouseX] = useState(WORLD_WIDTH / 2);
+  const [isWarning, setIsWarning] = useState(false);
+
+  const mergeQueueRef = useRef<{ a: Matter.Body; b: Matter.Body; level: number }[]>([]);
 
   const spawnFruit = useCallback((x: number, y: number, level: number, isStatic = false) => {
     if (!engineRef.current) return;
@@ -56,6 +60,7 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack, soundEna
     if (!canDrop || gameOver) return;
 
     setCanDrop(false);
+    if (soundEnabled) playPopSound();
     spawnFruit(mouseX, SPAWN_Y, nextFruitLevel);
 
     setNextFruitLevel(Math.floor(Math.random() * 5));
@@ -166,39 +171,56 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack, soundEna
         if (bodyA.label.startsWith('fruit_') && bodyA.label === bodyB.label) {
           const level = (bodyA as FruitBody).plugin.level;
           if (level < FRUIT_TYPES.length - 1) {
-            const midX = (bodyA.position.x + bodyB.position.x) / 2;
-            const midY = (bodyA.position.y + bodyB.position.y) / 2;
-
-            Matter.World.remove(engine.world, [bodyA, bodyB]);
-
-            spawnFruit(midX, midY, level + 1);
-            setScore(prev => {
-                const next = prev + FRUIT_TYPES[level + 1].score;
-                setHighScore(current => {
-                    if (next > current) {
-                        localStorage.setItem('fruitMerge_highScore', next.toString());
-                        return next;
-                    }
-                    return current;
-                });
-                return next;
-            });
+            // Check if already in queue to avoid double processing
+            const alreadyQueued = mergeQueueRef.current.some(m => m.a === bodyA || m.b === bodyA || m.a === bodyB || m.b === bodyB);
+            if (!alreadyQueued) {
+              mergeQueueRef.current.push({ a: bodyA, b: bodyB, level });
+            }
           }
         }
       });
     });
 
     Matter.Events.on(engine, 'afterUpdate', () => {
+        // Process merge queue
+        if (mergeQueueRef.current.length > 0) {
+          mergeQueueRef.current.forEach(({ a, b, level }) => {
+            if ((a as any).world && (b as any).world) {
+              const midX = (a.position.x + b.position.x) / 2;
+              const midY = (a.position.y + b.position.y) / 2;
+              Matter.World.remove(engine.world, [a, b]);
+              if (soundEnabled) playClearSound();
+              spawnFruit(midX, midY, level + 1);
+
+              setScore(prev => {
+                const next = prev + FRUIT_TYPES[level + 1].score;
+                setHighScore(current => {
+                  if (next > current) {
+                    localStorage.setItem('fruitMerge_highScore', next.toString());
+                    return next;
+                  }
+                  return current;
+                });
+                return next;
+              });
+            }
+          });
+          mergeQueueRef.current = [];
+        }
+
         const bodies = Matter.Composite.allBodies(engine.world);
         let isOverflowing = false;
 
         bodies.forEach(body => {
-            if (body.label.startsWith('fruit_') && body.position.y < 100 && body.velocity.y > -0.1) {
-                if (body.position.y > SPAWN_Y + 20) {
+            // Only count fruit that has been in the world for a bit (not currently dropping)
+            if (body.label.startsWith('fruit_') && body.position.y < 100 && Math.abs(body.velocity.y) < 0.5) {
+                if (body.position.y > SPAWN_Y + 50) { // Grace distance from spawn
                     isOverflowing = true;
                 }
             }
         });
+
+        setIsWarning(isOverflowing);
 
         if (isOverflowing) {
             if (!gameOverTimeoutRef.current) {
@@ -289,8 +311,13 @@ export const FruitMergeGame: React.FC<FruitMergeGameProps> = ({ onBack, soundEna
         <div ref={sceneRef} className="absolute inset-0 z-10" />
 
         {/* Drop Line / Guide */}
-        <div className="absolute top-[100px] left-0 right-0 h-0.5 bg-red-400/30 dashed pointer-events-none z-0"
-             style={{ borderTop: '2px dashed rgba(248, 113, 113, 0.4)' }} />
+        <div
+          className="absolute top-[100px] left-0 right-0 h-0.5 dashed pointer-events-none z-0 transition-colors duration-300"
+          style={{
+            borderTop: `2px dashed ${isWarning ? 'rgba(239, 68, 68, 1)' : 'rgba(248, 113, 113, 0.4)'}`,
+            boxShadow: isWarning ? '0 0 10px rgba(239, 68, 68, 0.5)' : 'none'
+          }}
+        />
 
         {/* Pending Fruit */}
         {canDrop && !gameOver && (
